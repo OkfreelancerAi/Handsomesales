@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="HANDSOMESALES helps you discover thoughtful products for relaxation, wellness and gifting.">
+  <title>HANDSOMESALES — Discover What's Worth Buying</title>
+  <style>
+    :root {
+      --bg: #0c0d12;
+      --panel: #161823;
+      --line: #2b2e3f;
+      --text: #f8f5ef;
+      --muted: #b9b5c4;
+      --gold: #f5ba54;
+      --mint: #71e3c4;
+      --pink: #ee88bb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Arial, sans-serif;
+      color: var(--text); background: radial-gradient(circle at 85% 0%, #332043 0%, var(--bg) 40%);
+      line-height: 1.55;
+    }
+    a { color: inherit; }
+    .wrap { width: min(1120px, calc(100% - 32px)); margin: auto; }
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 0; border-bottom: 1px solid var(--line);
+    }
+    .logo { font-weight: 900; letter-spacing: .09em; text-decoration: none; }
+    .logo span { color: var(--gold); }
+    .nav-link { color: var(--muted); text-decoration: none; font-size: 14px; }
+    .hero { padding: 92px 0 52px; max-width: 820px; }
+    .eyebrow { color: var(--mint); letter-spacing: .12em; font-size: 12px; font-weight: 800; }
+    h1 { font-size: clamp(42px, 8vw, 86px); line-height: .96; margin: 16px 0 20px; letter-spacing: -.06em; }
+    .lead { max-width: 640px; font-size: 19px; color: var(--muted); }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .button {
+      border: 0; border-radius: 999px; padding: 14px 19px; font-weight: 800;
+      background: var(--gold); color: #17110a; text-decoration: none; cursor: pointer;
+    }
+    .button.secondary { background: transparent; border: 1px solid var(--line); color: var(--text); }
+    section { padding: 34px 0 70px; }
+    h2 { font-size: 30px; margin: 0 0 7px; }
+    .section-intro { color: var(--muted); margin: 0 0 24px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card {
+      display: flex; flex-direction: column; padding: 22px; min-height: 270px;
+      background: linear-gradient(145deg, #1b1d2a, #13151e); border: 1px solid var(--line);
+      border-radius: 20px;
+    }
+    .tag { display: inline-block; width: max-content; border: 1px solid #514536; color: var(--gold); border-radius: 99px; padding: 4px 9px; font-size: 12px; font-weight: 800; }
+    .card h3 { margin: 18px 0 8px; font-size: 22px; }
+    .card p { color: var(--muted); margin: 0 0 20px; }
+    .card .button { margin-top: auto; text-align: center; }
+    .notice {
+      padding: 17px 19px; border-left: 3px solid var(--gold);
+      background: #181824; color: var(--muted); border-radius: 10px;
+    }
+    .sage {
+      position: fixed; z-index: 2; right: 18px; bottom: 18px; width: min(350px, calc(100% - 36px));
+      background: #f8f5ef; color: #17131d; padding: 17px; border-radius: 18px;
+      box-shadow: 0 15px 45px #0008;
+    }
+    .sage strong { display: block; }
+    .sage button { margin-top: 10px; border: none; border-radius: 9px; padding: 9px 12px; background: #241c35; color: white; cursor: pointer; }
+    footer { border-top: 1px solid var(--line); padding: 28px 0 110px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+      .hero { padding-top: 60px; }
+      .nav-link { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="#">HANDSOME<span>SALES</span> 🐭</a>
+      <a class="nav-link" href="#massage">Massage & Relaxation</a>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <div class="eyebrow">THE SMART SALESMAN OF THE INTERNET</div>
+        <h1>DISCOVER WHAT'S WORTH BUYING.</h1>
+        <p class="lead">Thoughtful product discoveries for relaxation, wellness and gifting—guided by useful research and Sage, your calm shopping companion.</p>
+        <div class="actions">
+          <a class="button" href="#massage">🔥 Explore Massage & Relaxation</a>
+          <button class="button secondary" onclick="openSage()">🤖 Ask Sage</button>
+        </div>
+      </section>
+
+      <section id="massage">
+        <h2>💆 Massage & Relaxation</h2>
+        <p class="section-intro">Start with a real need: a relaxing evening, a thoughtful gift, or a home self-care ritual. Check the Amazon page for current product details, price and availability.</p>
+
+        <!-- KORTE AFFILIATE DISCLOSURE -->
+        <p class="notice">
+          As an Amazon Associate I earn from qualifying purchases. We may earn a commission if you click an Amazon link and make a purchase.
+        </p>
+
+        <div class="grid">
+          <article class="card">
+            <span class="tag">⭐ Sage Pick</span>
+            <h3>Massage Oil Discovery</h3>
+            <p>Explore massage-oil options directly on Amazon. Read the current listing and ingredients before deciding what suits your preferences.</p>
+            <a class="button"
+              href="https://www.amazon.com/dp/JOUW_ECHTE_ASIN_HIER?tag=handsomesales-20"
+              target="_blank" rel="noopener sponsored"
+              onclick="track('massage_oil_click')">View on Amazon</a>
+          </article>
+
+          <article class="card">
+            <span class="tag">💎 Worth Discovering</span>
+            <h3>Aromatherapy Finds</h3>
+            <p>Find aroma-focused products for a calming home routine. Product information and suitability should always be checked on the seller's listing.</p>
+            <a class="button"
+              href="https://www.amazon.com/dp/JOUW_ECHTE_ASIN_HIER?tag=handsomesales-20"
+              target="_blank" rel="noopener sponsored"
+              onclick="track('aromatherapy_click')">See the Find</a>
+          </article>
+
+          <article class="card">
+            <span class="tag">🎁 Gift Discovery</span>
+            <h3>Self-Care Gift Ideas</h3>
+            <p>Useful gift ideas for people who appreciate a slower moment. Compare current options and delivery details on Amazon.</p>
+            <a class="button"
+              href="https://www.amazon.com/dp/JOUW_ECHTE_ASIN_HIER?tag=handsomesales-20"
+              target="_blank" rel="noopener sponsored"
+              onclick="track('gift_click')">Explore Gifts</a>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <h2>Built on trust</h2>
+        <p class="notice">
+          Affiliate disclosure: HANDSOMESALES participates in the Amazon Associates Program. This means we may earn a commission from qualifying purchases via links to Amazon.com and other Amazon sites. Product details, prices and availability change — always check the seller's listing before buying. HANDSOMESALES is not affiliated with or endorsed by Amazon.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      © 2026 HANDSOMESALES · Discover → Help → Trust → Explore · Affiliate disclosure included.
+    </footer>
+  </div>
+
+  <aside class="sage" id="sage" hidden aria-live="polite">
+    <strong>Hi, I'm Sage 👋</strong>
+    <span>Looking for something relaxing, a massage product, or a gift? I can help you start with the right category.</span>
+    <button onclick="document.getElementById('massage').scrollIntoView({behavior:'smooth'}); closeSage();">Show Massage Finds</button>
+    <button onclick="closeSage()">Minimize</button>
+  </aside>
+
+  <script>
+    function openSage() {
+      document.getElementById('sage').hidden = false;
+      localStorage.setItem('sageSeen', 'true');
+      track('sage_open');
+    }
+    function closeSage() {
+      document.getElementById('sage').hidden = true;
+    }
+    function track(eventName) {
+      console.log('HANDSOMESALES event:', eventName);
+      // Connect this later to Vercel Analytics, Plausible, GA4, or your own endpoint.
+    }
+    if (!localStorage.getItem('sageSeen')) {
+      setTimeout(openSage, 1700);
+    }
+  </script>
+</body>
+</html>
