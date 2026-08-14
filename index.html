@@ -73,7 +73,7 @@
     }
   </style>
 </head>
-<body>
+<body data-hs-endpoint="">
   <div class="wrap">
     <nav>
       <a class="logo" href="#">HANDSOME<span>SALES</span> 🐭</a>
@@ -87,7 +87,7 @@
         <p class="lead">Thoughtful product discoveries for relaxation, wellness and gifting—guided by useful research and Sage, your calm shopping companion.</p>
         <div class="actions">
           <a class="button" href="#massage">🔥 Explore Massage & Relaxation</a>
-          <button class="button secondary" onclick="openSage()">🤖 Ask Sage</button>
+          <button class="button secondary" id="open-sage">🤖 Ask Sage</button>
         </div>
       </section>
 
@@ -105,30 +105,36 @@
             <span class="tag">⭐ Sage Pick</span>
             <h3>Massage Oil Discovery</h3>
             <p>Explore massage-oil options directly on Amazon. Read the current listing and ingredients before deciding what suits your preferences.</p>
-            <a class="button"
+            <a class="button hs-affiliate"
               href="https://www.amazon.com/dp/B0D8R1MBBP?tag=handsomesales-20"
               target="_blank" rel="noopener sponsored"
-              onclick="track('massage_oil_click')">View on Amazon</a>
+              data-hs-product="B0D8R1MBBP"
+              data-hs-label="Sage Pick"
+              data-hs-category="massage">View on Amazon</a>
           </article>
 
           <article class="card">
             <span class="tag">💎 Worth Discovering</span>
             <h3>Aromatherapy Finds</h3>
             <p>Find aroma-focused products for a calming home routine. Product information and suitability should always be checked on the seller's listing.</p>
-            <a class="button"
+            <a class="button hs-affiliate"
               href="https://amzn.to/4wlbL6u"
               target="_blank" rel="noopener sponsored"
-              onclick="track('aromatherapy_click')">See the Find</a>
+              data-hs-product="https://amzn.to/4wlbL6u"
+              data-hs-label="Worth Discovering"
+              data-hs-category="aromatherapy">See the Find</a>
           </article>
 
           <article class="card">
             <span class="tag">🎁 Gift Discovery</span>
             <h3>Self-Care Gift Ideas</h3>
             <p>Useful gift ideas for people who appreciate a slower moment. Compare current options and delivery details on Amazon.</p>
-            <a class="button"
+            <a class="button hs-affiliate"
               href="https://a.co/d/0cuxr6Rz"
               target="_blank" rel="noopener sponsored"
-              onclick="track('gift_click')">Explore Gifts</a>
+              data-hs-product="https://a.co/d/0cuxr6Rz"
+              data-hs-label="Gift Discovery"
+              data-hs-category="gifts">Explore Gifts</a>
           </article>
         </div>
       </section>
@@ -148,27 +154,124 @@
 
   <aside class="sage" id="sage" hidden aria-live="polite">
     <strong>Hi, I'm Sage 👋</strong>
-    <span>Looking for something relaxing, a massage product, or a gift? I can help you start with the right category.</span>
-    <button onclick="document.getElementById('massage').scrollIntoView({behavior:'smooth'}); closeSage();">Show Massage Finds</button>
-    <button onclick="closeSage()">Minimize</button>
+    <div id="sage-content">Looking for something relaxing, a massage product, or a gift? I can help you start with the right category.</div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+      <button class="sage-intent" data-intent="relax">RELAX</button>
+      <button class="sage-intent" data-intent="massage">MASSAGE</button>
+      <button class="sage-intent" data-intent="gift">GIFT</button>
+      <button class="sage-intent" data-intent="wellness">WELLNESS</button>
+      <button class="sage-intent" data-intent="discover">DISCOVER</button>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;">
+      <button id="sage-show-find">Show Find</button>
+      <button id="sage-minimize">Minimize</button>
+    </div>
   </aside>
 
   <script>
-    function openSage() {
-      document.getElementById('sage').hidden = false;
-      localStorage.setItem('sageSeen', 'true');
-      track('sage_open');
+    // Lightweight analytics/tracking helper
+    // - Pushes to dataLayer if present
+    // - console.logs for local testing
+    // - Uses navigator.sendBeacon to optional endpoint if body[data-hs-endpoint] is set
+    // - DOES NOT collect PII
+    window.dataLayer = window.dataLayer || [];
+
+    function hsTrack(eventName, props) {
+      try {
+        var payload = Object.assign({event: eventName, ts: new Date().toISOString()}, props || {});
+        // 1) dataLayer push
+        window.dataLayer.push(payload);
+        // 2) console for debugging
+        console.log('HS_TRACK', payload);
+        // 3) optional beacon
+        var endpoint = document.body.getAttribute('data-hs-endpoint');
+        if (endpoint) {
+          try {
+            var blob = new Blob([JSON.stringify(payload)], {type: 'application/json'});
+            navigator.sendBeacon(endpoint, blob);
+          } catch (e) {
+            // ignore send errors
+            console.warn('hsTrack beacon failed', e);
+          }
+        }
+        // 4) local backup (non-PII)
+        try {
+          var events = JSON.parse(localStorage.getItem('hs_events') || '[]');
+          events.push(payload);
+          localStorage.setItem('hs_events', JSON.stringify(events.slice(-200)));
+        } catch (e) {
+          // ignore
+        }
+      } catch (e) {
+        console.error('hsTrack error', e);
+      }
     }
-    function closeSage() {
-      document.getElementById('sage').hidden = true;
-    }
-    function track(eventName) {
-      console.log('HANDSOMESALES event:', eventName);
-      // Connect this later to Vercel Analytics, Plausible, GA4, or your own endpoint.
-    }
-    if (!localStorage.getItem('sageSeen')) {
-      setTimeout(openSage, 1700);
-    }
+
+    // Attach affiliate click tracking to links with .hs-affiliate
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('a.hs-affiliate').forEach(function(a) {
+        a.addEventListener('click', function(e) {
+          // don't block navigation, just fire tracking
+          var product = a.getAttribute('data-hs-product') || a.href;
+          var label = a.getAttribute('data-hs-label') || '';
+          var category = a.getAttribute('data-hs-category') || '';
+          hsTrack('affiliate_click', {product: product, label: label, category: category, url: a.href});
+          // Also track product_click and product_view optionally
+          hsTrack('product_click', {product: product, label: label, category: category});
+        }, {passive: true});
+      });
+
+      // Sage controls
+      var sage = document.getElementById('sage');
+      var openBtn = document.getElementById('open-sage');
+      var minimize = document.getElementById('sage-minimize');
+      var showFind = document.getElementById('sage-show-find');
+      var sageContent = document.getElementById('sage-content');
+      var selectedIntent = null;
+
+      openBtn.addEventListener('click', function() {
+        sage.hidden = false;
+        hsTrack('sage_open');
+      });
+      minimize.addEventListener('click', function() {
+        sage.hidden = true;
+        hsTrack('sage_minimize');
+      });
+
+      document.querySelectorAll('.sage-intent').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          selectedIntent = btn.getAttribute('data-intent');
+          hsTrack('sage_intent_selected', {intent: selectedIntent});
+          // Update sage content with a simple recommendation mapping
+          var mapping = {
+            relax: {product: 'https://amzn.to/4wlbL6u', label: 'Worth Discovering', reason: 'Aromatherapy blends help create a calming environment.'},
+            massage: {product: 'B0D8R1MBBP', label: 'Sage Pick', reason: 'This massage oil is Sage\'s recommended pick for home self-care.'},
+            gift: {product: 'https://a.co/d/0cuxr6Rz', label: 'Gift Discovery', reason: 'A curated self-care gift for slow moments.'},
+            wellness: {product: 'https://amzn.to/4wlbL6u', label: 'Worth Discovering', reason: 'Wellness essentials to support relaxation routines.'},
+            discover: {product: 'B0D8R1MBBP', label: 'Sage Pick', reason: 'Start with Sage\'s top pick and explore alternatives.'}
+          };
+          var rec = mapping[selectedIntent] || mapping.discover;
+          sageContent.innerHTML = '<strong>' + (rec.label || '') + '</strong><div style="margin-top:6px;">' + rec.reason + '</div>';
+          // Keep showFind button target in dataset for later action
+          showFind.setAttribute('data-rec-product', rec.product);
+          showFind.setAttribute('data-rec-label', rec.label || '');
+          showFind.setAttribute('data-rec-category', selectedIntent);
+        });
+      });
+
+      showFind.addEventListener('click', function() {
+        var prod = showFind.getAttribute('data-rec-product');
+        var label = showFind.getAttribute('data-rec-label');
+        var category = showFind.getAttribute('data-rec-category');
+        if (!prod) return;
+        hsTrack('sage_show_find', {product: prod, label: label, category: category});
+        // open the product in a new tab
+        try { window.open(prod, '_blank', 'noopener'); } catch(e) { window.location = prod; }
+      });
+
+      // Expose a simple global for manual tracking in console
+      window.hsTrack = hsTrack;
+    });
   </script>
 </body>
 </html>
