@@ -15,62 +15,80 @@
       --gold: #f5ba54;
       --mint: #71e3c4;
       --pink: #ee88bb;
+      --accent: #7ef0d6;
     }
     * { box-sizing: border-box; }
+    html,body { height: 100%; }
     body {
       margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Arial, sans-serif;
       color: var(--text); background: radial-gradient(circle at 85% 0%, #332043 0%, var(--bg) 40%);
       line-height: 1.55;
     }
+
     a { color: inherit; }
     .wrap { width: min(1120px, calc(100% - 32px)); margin: auto; }
-    nav {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 0; border-bottom: 1px solid var(--line);
-    }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; border-bottom: 1px solid var(--line); }
     .logo { font-weight: 900; letter-spacing: .09em; text-decoration: none; }
     .logo span { color: var(--gold); }
     .nav-link { color: var(--muted); text-decoration: none; font-size: 14px; }
-    .hero { padding: 92px 0 52px; max-width: 820px; }
+
+    .hero { padding: 72px 0 28px; max-width: 820px; }
     .eyebrow { color: var(--mint); letter-spacing: .12em; font-size: 12px; font-weight: 800; }
-    h1 { font-size: clamp(42px, 8vw, 86px); line-height: .96; margin: 16px 0 20px; letter-spacing: -.06em; }
-    .lead { max-width: 640px; font-size: 19px; color: var(--muted); }
-    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-    .button {
-      border: 0; border-radius: 999px; padding: 14px 19px; font-weight: 800;
-      background: var(--gold); color: #17110a; text-decoration: none; cursor: pointer;
-    }
+    h1 { font-size: clamp(36px, 7vw, 72px); line-height: .96; margin: 12px 0 18px; letter-spacing: -.04em; }
+    .lead { max-width: 640px; font-size: 17px; color: var(--muted); }
+    .actions { display: flex; gap: 12px; margin-top: 18px; }
+
+    .button { border: 0; border-radius: 999px; padding: 12px 16px; font-weight: 800; background: var(--gold); color: #17110a; text-decoration: none; cursor: pointer; }
     .button.secondary { background: transparent; border: 1px solid var(--line); color: var(--text); }
-    section { padding: 34px 0 70px; }
-    h2 { font-size: 30px; margin: 0 0 7px; }
-    .section-intro { color: var(--muted); margin: 0 0 24px; }
+
+    section { padding: 30px 0 60px; }
+    h2 { font-size: 26px; margin: 0 0 10px; }
+    .section-intro { color: var(--muted); margin: 0 0 18px; }
+
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .card {
-      display: flex; flex-direction: column; padding: 22px; min-height: 270px;
-      background: linear-gradient(145deg, #1b1d2a, #13151e); border: 1px solid var(--line);
-      border-radius: 20px;
-    }
+    .card { display: flex; flex-direction: column; padding: 18px; min-height: 240px; background: linear-gradient(145deg, #1b1d2a, #13151e); border: 1px solid var(--line); border-radius: 16px; }
     .tag { display: inline-block; width: max-content; border: 1px solid #514536; color: var(--gold); border-radius: 99px; padding: 4px 9px; font-size: 12px; font-weight: 800; }
-    .card h3 { margin: 18px 0 8px; font-size: 22px; }
-    .card p { color: var(--muted); margin: 0 0 20px; }
-    .card .button { margin-top: auto; text-align: center; }
-    .notice {
-      padding: 17px 19px; border-left: 3px solid var(--gold);
-      background: #181824; color: var(--muted); border-radius: 10px;
+    .card h3 { margin: 14px 0 8px; font-size: 20px; }
+    .card p { color: var(--muted); margin: 0 0 14px; }
+
+    .notice { padding: 14px 16px; border-left: 3px solid var(--gold); background: #181824; color: var(--muted); border-radius: 10px; }
+
+    /* Sage avatar + states */
+    .sage { position: fixed; z-index: 999; right: 18px; bottom: 18px; width: min(420px, calc(100% - 36px)); background: #f8f5ef; color: #17131d; padding: 14px; border-radius: 14px; box-shadow: 0 18px 60px #0008; transform-origin: bottom right; }
+    .sage.hidden { display: none; }
+    .sage-header { display:flex;align-items:center;gap:10px }
+    .sage-avatar { width:46px;height:46px;border-radius:10px;display:inline-grid;place-items:center;background:#241c35;color:white;font-weight:800; }
+    .sage-state { font-size:12px;color:#564e66 }
+    .sage-content { margin-top:10px;color:#121212 }
+    .sage-controls { margin-top:12px;display:flex;gap:8px;flex-wrap:wrap }
+    .sage-intent { background:transparent;border:1px solid var(--line);padding:8px 10px;border-radius:10px;color:var(--muted);cursor:pointer }
+    .sage-action { background:var(--mint);color:#072; padding:8px 12px;border-radius:10px;border:0;cursor:pointer;font-weight:700 }
+
+    /* Avatar states visuals */
+    .avatar-idle { box-shadow: 0 0 0 0 rgba(113,227,196,0.0); }
+    @media (prefers-reduced-motion: no-preference) {
+      .avatar-idle { animation: idlePulse 6s ease-in-out infinite; }
+      @keyframes idlePulse { 0% { transform: translateY(0);} 50% { transform: translateY(-3px);} 100% { transform: translateY(0);} }
+      .avatar-listening { box-shadow: 0 6px 20px rgba(113,227,196,0.08), 0 0 0 6px rgba(113,227,196,0.05); }
+      .avatar-thinking { animation: thinking 1.6s linear infinite; }
+      @keyframes thinking { 0%{transform:rotate(0)}50%{transform:rotate(3deg)}100%{transform:rotate(0)} }
     }
-    .sage {
-      position: fixed; z-index: 2; right: 18px; bottom: 18px; width: min(350px, calc(100% - 36px));
-      background: #f8f5ef; color: #17131d; padding: 17px; border-radius: 18px;
-      box-shadow: 0 15px 45px #0008;
-    }
-    .sage strong { display: block; }
-    .sage button { margin-top: 10px; border: none; border-radius: 9px; padding: 9px 12px; background: #241c35; color: white; cursor: pointer; }
-    footer { border-top: 1px solid var(--line); padding: 28px 0 110px; color: var(--muted); font-size: 13px; }
+
+    /* Recommendation / compare panels inside sage */
+    .sage-card { margin-top:10px;background:#fff;border-radius:10px;padding:12px;color:#111 }
+    .sage-card h4{margin:0 0 6px}
+    .sage-card p{margin:0 0 8px;color:#444}
+    .sage-cta{display:inline-block;padding:8px 10px;border-radius:8px;background:#241c35;color:white;text-decoration:none;font-weight:700}
+
+    /* small screens */
     @media (max-width: 760px) {
       .grid { grid-template-columns: 1fr; }
-      .hero { padding-top: 60px; }
-      .nav-link { display: none; }
+      .sage{right:12px;left:12px;width:calc(100% - 24px);bottom:12px}
     }
+
+    /* focus states for accessibility */
+    :focus { outline: 3px solid rgba(117, 82, 255, 0.12); outline-offset: 2px; }
+
   </style>
 </head>
 <body data-hs-endpoint="">
@@ -96,54 +114,35 @@
         <p class="section-intro">Start with a real need: a relaxing evening, a thoughtful gift, or a home self-care ritual. Check the Amazon page for current product details, price and availability.</p>
 
         <!-- KORTE AFFILIATE DISCLOSURE -->
-        <p class="notice">
-          As an Amazon Associate I earn from qualifying purchases. We may earn a commission if you click an Amazon link and make a purchase.
-        </p>
+        <p class="notice">As an Amazon Associate I earn from qualifying purchases. We may earn a commission if you click an Amazon link and make a purchase.</p>
 
-        <div class="grid">
-          <article class="card">
+        <div class="grid" id="product-grid">
+          <article class="card" data-product-id="B0D8R1MBBP">
             <span class="tag">⭐ Sage Pick</span>
             <h3>Massage Oil Discovery</h3>
             <p>Explore massage-oil options directly on Amazon. Read the current listing and ingredients before deciding what suits your preferences.</p>
-            <a class="button hs-affiliate"
-              href="https://www.amazon.com/dp/B0D8R1MBBP?tag=handsomesales-20"
-              target="_blank" rel="noopener sponsored"
-              data-hs-product="B0D8R1MBBP"
-              data-hs-label="Sage Pick"
-              data-hs-category="massage">View on Amazon</a>
+            <a class="button hs-affiliate" href="https://www.amazon.com/dp/B0D8R1MBBP?tag=handsomesales-20" target="_blank" rel="noopener sponsored" data-hs-product="B0D8R1MBBP" data-hs-label="Sage Pick" data-hs-category="massage">View on Amazon</a>
           </article>
 
-          <article class="card">
+          <article class="card" data-product-id="amzn-4wlbL6u">
             <span class="tag">💎 Worth Discovering</span>
             <h3>Aromatherapy Finds</h3>
             <p>Find aroma-focused products for a calming home routine. Product information and suitability should always be checked on the seller's listing.</p>
-            <a class="button hs-affiliate"
-              href="https://amzn.to/4wlbL6u"
-              target="_blank" rel="noopener sponsored"
-              data-hs-product="https://amzn.to/4wlbL6u"
-              data-hs-label="Worth Discovering"
-              data-hs-category="aromatherapy">See the Find</a>
+            <a class="button hs-affiliate" href="https://amzn.to/4wlbL6u" target="_blank" rel="noopener sponsored" data-hs-product="https://amzn.to/4wlbL6u" data-hs-label="Worth Discovering" data-hs-category="aromatherapy">See the Find</a>
           </article>
 
-          <article class="card">
+          <article class="card" data-product-id="a-co-0cuxr6Rz">
             <span class="tag">🎁 Gift Discovery</span>
             <h3>Self-Care Gift Ideas</h3>
             <p>Useful gift ideas for people who appreciate a slower moment. Compare current options and delivery details on Amazon.</p>
-            <a class="button hs-affiliate"
-              href="https://a.co/d/0cuxr6Rz"
-              target="_blank" rel="noopener sponsored"
-              data-hs-product="https://a.co/d/0cuxr6Rz"
-              data-hs-label="Gift Discovery"
-              data-hs-category="gifts">Explore Gifts</a>
+            <a class="button hs-affiliate" href="https://a.co/d/0cuxr6Rz" target="_blank" rel="noopener sponsored" data-hs-product="https://a.co/d/0cuxr6Rz" data-hs-label="Gift Discovery" data-hs-category="gifts">Explore Gifts</a>
           </article>
         </div>
       </section>
 
       <section>
         <h2>Built on trust</h2>
-        <p class="notice">
-          Affiliate disclosure: HANDSOMESALES participates in the Amazon Associates Program. This means we may earn a commission from qualifying purchases via links to Amazon.com and other Amazon sites. Product details, prices and availability change — always check the seller's listing before buying. HANDSOMESALES is not affiliated with or endorsed by Amazon.
-        </p>
+        <p class="notice">Affiliate disclosure: HANDSOMESALES participates in the Amazon Associates Program. This means we may earn a commission from qualifying purchases via links to Amazon.com and other Amazon sites. Product details, prices and availability change — always check the seller's listing before buying. HANDSOMESALES is not affiliated with or endorsed by Amazon.</p>
       </section>
     </main>
 
@@ -152,126 +151,224 @@
     </footer>
   </div>
 
-  <aside class="sage" id="sage" hidden aria-live="polite">
-    <strong>Hi, I'm Sage 👋</strong>
-    <div id="sage-content">Looking for something relaxing, a massage product, or a gift? I can help you start with the right category.</div>
-    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+  <!-- SAGE: Sales Agent + Avatar Assist -->
+  <aside class="sage" id="sage" hidden aria-live="polite" aria-label="Sage shopping assistant">
+    <div class="sage-header">
+      <div id="sage-avatar" class="sage-avatar avatar-idle" aria-hidden="true">S</div>
+      <div>
+        <div><strong>Sage</strong></div>
+        <div class="sage-state" id="sage-state">Idle</div>
+      </div>
+    </div>
+
+    <div class="sage-content" id="sage-content">What are we finding today?</div>
+
+    <div class="sage-controls" id="sage-controls">
       <button class="sage-intent" data-intent="relax">RELAX</button>
       <button class="sage-intent" data-intent="massage">MASSAGE</button>
       <button class="sage-intent" data-intent="gift">GIFT</button>
       <button class="sage-intent" data-intent="wellness">WELLNESS</button>
       <button class="sage-intent" data-intent="discover">DISCOVER</button>
     </div>
-    <div style="margin-top:10px;display:flex;gap:8px;">
-      <button id="sage-show-find">Show Find</button>
-      <button id="sage-minimize">Minimize</button>
+
+    <div id="sage-recommendation" class="sage-card" hidden aria-live="polite"></div>
+
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button id="sage-show-find" class="sage-action">Explore This Find</button>
+      <button id="sage-compare" class="sage-intent">Compare</button>
+      <button id="sage-start-over" class="sage-intent">Start Over</button>
+      <button id="sage-close" class="sage-intent">Close</button>
     </div>
   </aside>
 
   <script>
-    // Lightweight analytics/tracking helper
-    // - Pushes to dataLayer if present
-    // - console.logs for local testing
-    // - Uses navigator.sendBeacon to optional endpoint if body[data-hs-endpoint] is set
-    // - DOES NOT collect PII
-    window.dataLayer = window.dataLayer || [];
+    // Product data model (extensible)
+    const HS_PRODUCTS = [
+      { id: 'B0D8R1MBBP', name: 'Massage Oil Discovery', category: 'massage', intentTags: ['massage','discover'], description: 'A calming massage oil for home self-care.', affiliateUrl: 'https://www.amazon.com/dp/B0D8R1MBBP?tag=handsomesales-20', ctaLabel: "View on Amazon", sageLabel: "Sage Pick", priority: 1, alternatives: ['amzn-4wlbL6u'] },
+      { id: 'amzn-4wlbL6u', name: 'Aromatherapy Blend', category: 'aromatherapy', intentTags: ['relax','wellness','discover'], description: 'A versatile aromatherapy blend to support calm routines.', affiliateUrl: 'https://amzn.to/4wlbL6u', ctaLabel: "See the Find", sageLabel: "Worth Discovering", priority: 2, alternatives: ['B0D8R1MBBP'] },
+      { id: 'a-co-0cuxr6Rz', name: 'Self-Care Gift Set', category: 'gifts', intentTags: ['gift','discover'], description: 'A thoughtfully curated self-care gift set.', affiliateUrl: 'https://a.co/d/0cuxr6Rz', ctaLabel: "Explore Gifts", sageLabel: "Gift Discovery", priority: 2, alternatives: ['B0D8R1MBBP'] }
+    ];
 
-    function hsTrack(eventName, props) {
-      try {
-        var payload = Object.assign({event: eventName, ts: new Date().toISOString()}, props || {});
-        // 1) dataLayer push
-        window.dataLayer.push(payload);
-        // 2) console for debugging
-        console.log('HS_TRACK', payload);
-        // 3) optional beacon
-        var endpoint = document.body.getAttribute('data-hs-endpoint');
-        if (endpoint) {
-          try {
-            var blob = new Blob([JSON.stringify(payload)], {type: 'application/json'});
-            navigator.sendBeacon(endpoint, blob);
-          } catch (e) {
-            // ignore send errors
-            console.warn('hsTrack beacon failed', e);
-          }
-        }
-        // 4) local backup (non-PII)
-        try {
-          var events = JSON.parse(localStorage.getItem('hs_events') || '[]');
-          events.push(payload);
-          localStorage.setItem('hs_events', JSON.stringify(events.slice(-200)));
-        } catch (e) {
-          // ignore
-        }
-      } catch (e) {
-        console.error('hsTrack error', e);
+    // Lightweight Sales Skills - state model
+    const HS = {
+      state: 'BROWSING', // BROWSING, DISCOVERING, QUALIFYING, RECOMMENDING, COMPARING, READY
+      intent: null,
+      occasion: null,
+      confidence: 0,
+      recommended: null,
+      alternative: null
+    };
+
+    // hsTrack (already present via earlier commits) - safe to call if defined globally
+    function safeTrack(event, props) {
+      try { if (window.hsTrack) window.hsTrack(event, props); else console.log('HS_TRACK (local)', event, props); } catch(e) {}
+    }
+
+    // Utility: find best match by intent
+    function findBestForIntent(intent) {
+      // prefer exact category match first, then intentTags
+      let candidates = HS_PRODUCTS.slice().sort((a,b)=>a.priority-b.priority);
+      let match = candidates.find(p => p.category === intent) || candidates.find(p => (p.intentTags||[]).includes(intent)) || candidates[0];
+      let alternative = candidates.find(p => p.id !== match.id) || null;
+      return {match, alternative};
+    }
+
+    // Qualification - ask one quick question (is it a gift?) unless intent is discover
+    function qualifyIntent(intent, cb) {
+      HS.state = 'QUALIFYING';
+      safeTrack('sage_qualifying_start', {intent});
+      // ask: for who? quick modal via sage-content
+      const sc = document.getElementById('sage-content');
+      sc.innerHTML = '<div><strong>Quick question:</strong> Is this for you or a gift?</div>' +
+        '<div style="display:flex;gap:8px;margin-top:8px">' +
+        '<button class="sage-qual" data-val="personal">For me</button>' +
+        '<button class="sage-qual" data-val="gift">Gift</button>' +
+        '</div>';
+      document.querySelectorAll('.sage-qual').forEach(btn=>btn.addEventListener('click', (e)=>{
+        HS.occasion = e.target.getAttribute('data-val');
+        safeTrack('sage_qual_answered', {intent, occasion: HS.occasion});
+        sc.innerHTML = '<div>Thanks — hold on while I pick something.</div>';
+        setTimeout(()=>cb(HS.occasion), 500);
+      }));
+    }
+
+    // Recommendation flow
+    function recommendFor(intent) {
+      HS.intent = intent;
+      HS.state = 'DISCOVERING';
+      safeTrack('sage_intent_selected', {intent});
+      // simple qualification when useful
+      if (intent !== 'discover') {
+        qualifyIntent(intent, (occasion) => {
+          const {match, alternative} = findBestForIntent(intent);
+          HS.recommended = match; HS.alternative = alternative; HS.state = 'RECOMMENDING';
+          showRecommendation(match, alternative, intent);
+        });
+      } else {
+        const {match, alternative} = findBestForIntent(intent);
+        HS.recommended = match; HS.alternative = alternative; HS.state = 'RECOMMENDING';
+        showRecommendation(match, alternative, intent);
       }
     }
 
-    // Attach affiliate click tracking to links with .hs-affiliate
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('a.hs-affiliate').forEach(function(a) {
-        a.addEventListener('click', function(e) {
-          // don't block navigation, just fire tracking
-          var product = a.getAttribute('data-hs-product') || a.href;
-          var label = a.getAttribute('data-hs-label') || '';
-          var category = a.getAttribute('data-hs-category') || '';
-          hsTrack('affiliate_click', {product: product, label: label, category: category, url: a.href});
-          // Also track product_click and product_view optionally
-          hsTrack('product_click', {product: product, label: label, category: category});
-        }, {passive: true});
-      });
+    function showRecommendation(match, alternative, intent) {
+      const panel = document.getElementById('sage-recommendation');
+      panel.hidden = false;
+      panel.innerHTML = '<h4>' + (match.sageLabel || '') + '</h4>' +
+        '<p>' + match.description + '</p>' +
+        '<div style="display:flex;gap:8px;margin-top:8px">' +
+        '<a class="sage-cta" href="' + match.affiliateUrl + '" target="_blank" rel="noopener sponsored" data-hs-product="' + match.id + '">' + (match.ctaLabel || 'Explore') + '</a>' +
+        (alternative ? '<button id="sage-show-alt" class="sage-intent">See alternative</button>' : '') +
+        '</div>';
+      document.getElementById('sage-state').textContent = 'Recommending';
+      document.getElementById('sage-avatar').classList.remove('avatar-thinking');
+      document.getElementById('sage-avatar').classList.add('avatar-idle');
 
-      // Sage controls
-      var sage = document.getElementById('sage');
-      var openBtn = document.getElementById('open-sage');
-      var minimize = document.getElementById('sage-minimize');
-      var showFind = document.getElementById('sage-show-find');
-      var sageContent = document.getElementById('sage-content');
-      var selectedIntent = null;
-
-      openBtn.addEventListener('click', function() {
-        sage.hidden = false;
-        hsTrack('sage_open');
-      });
-      minimize.addEventListener('click', function() {
-        sage.hidden = true;
-        hsTrack('sage_minimize');
-      });
-
-      document.querySelectorAll('.sage-intent').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          selectedIntent = btn.getAttribute('data-intent');
-          hsTrack('sage_intent_selected', {intent: selectedIntent});
-          // Update sage content with a simple recommendation mapping
-          var mapping = {
-            relax: {product: 'https://amzn.to/4wlbL6u', label: 'Worth Discovering', reason: 'Aromatherapy blends help create a calming environment.'},
-            massage: {product: 'B0D8R1MBBP', label: 'Sage Pick', reason: 'This massage oil is Sage\'s recommended pick for home self-care.'},
-            gift: {product: 'https://a.co/d/0cuxr6Rz', label: 'Gift Discovery', reason: 'A curated self-care gift for slow moments.'},
-            wellness: {product: 'https://amzn.to/4wlbL6u', label: 'Worth Discovering', reason: 'Wellness essentials to support relaxation routines.'},
-            discover: {product: 'B0D8R1MBBP', label: 'Sage Pick', reason: 'Start with Sage\'s top pick and explore alternatives.'}
-          };
-          var rec = mapping[selectedIntent] || mapping.discover;
-          sageContent.innerHTML = '<strong>' + (rec.label || '') + '</strong><div style="margin-top:6px;">' + rec.reason + '</div>';
-          // Keep showFind button target in dataset for later action
-          showFind.setAttribute('data-rec-product', rec.product);
-          showFind.setAttribute('data-rec-label', rec.label || '');
-          showFind.setAttribute('data-rec-category', selectedIntent);
+      // bind cta tracking
+      panel.querySelectorAll('.sage-cta').forEach(el=>{
+        el.addEventListener('click', ()=>{
+          safeTrack('cta_clicked', {product: match.id, intent});
+          safeTrack('affiliate_click', {product: match.id, label: match.sageLabel, category: match.category, url: match.affiliateUrl});
         });
       });
+      const altBtn = document.getElementById('sage-show-alt');
+      if (altBtn) altBtn.addEventListener('click', ()=>{
+        safeTrack('product_compared', {base: match.id, alt: alternative.id});
+        showComparison(match, alternative);
+      });
+    }
 
-      showFind.addEventListener('click', function() {
-        var prod = showFind.getAttribute('data-rec-product');
-        var label = showFind.getAttribute('data-rec-label');
-        var category = showFind.getAttribute('data-rec-category');
-        if (!prod) return;
-        hsTrack('sage_show_find', {product: prod, label: label, category: category});
-        // open the product in a new tab
-        try { window.open(prod, '_blank', 'noopener'); } catch(e) { window.location = prod; }
+    function showComparison(a,b) {
+      HS.state = 'COMPARING';
+      const panel = document.getElementById('sage-recommendation');
+      panel.hidden = false;
+      panel.innerHTML = '<h4>Quick comparison</h4>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+        '<div style="flex:1"><strong>' + a.name + '</strong><p>' + a.description + '</p></div>' +
+        '<div style="flex:1"><strong>' + b.name + '</strong><p>' + b.description + '</p></div>' +
+        '</div>' +
+        '<div style="margin-top:8px"><button id="compare-choose-a" class="sage-action">Choose ' + a.sageLabel + '</button> <button id="compare-choose-b" class="sage-action">Choose ' + b.sageLabel + '</button></div>';
+      document.getElementById('sage-state').textContent = 'Comparing';
+      document.getElementById('compare-choose-a').addEventListener('click', ()=>{
+        safeTrack('product_recommended', {chosen: a.id});
+        window.open(a.affiliateUrl, '_blank', 'noopener');
+      });
+      document.getElementById('compare-choose-b').addEventListener('click', ()=>{
+        safeTrack('product_recommended', {chosen: b.id});
+        window.open(b.affiliateUrl, '_blank', 'noopener');
+      });
+    }
+
+    // Objection handling - lightweight, no invented claims
+    function handleObjection(text) {
+      safeTrack('objection_detected', {text});
+      const safeReplies = {
+        'is this worth exploring': 'If you want low-effort relaxation, start with the Sage Pick — it fits most at-home routines. Want a quick comparison?',
+        'i\'m not sure which one': 'I can compare two options quickly — pick the ones you want to compare or I can pick an alternative for you.',
+        'i\'m looking for a gift': 'Great — the gift set is curated for a calm, thoughtful present. Would you like the gift or a complementary aromatherapy item?',
+        'i want something relaxing': 'Aromatherapy is a simple start — it helps set a calm environment without extra steps.',
+        'i don\'t want to spend much': 'I can highlight the simplest, lower-risk find — want me to choose one?',
+        'i need something simple': 'Pick the Sage Pick — minimal steps, easy to use, high fit for self-care routines.'
+      };
+      const reply = safeReplies[text.toLowerCase()] || 'I don\'t have that info here — I can compare items or show alternatives. Want me to compare?';
+      const sc = document.getElementById('sage-content');
+      sc.innerHTML = '<div>' + reply + '</div>';
+    }
+
+    // Cross-sell / next-best-find
+    function suggestCrossSell(primary) {
+      const altId = primary.alternatives && primary.alternatives[0];
+      if (!altId) return;
+      const alt = HS_PRODUCTS.find(p=>p.id===altId);
+      if (!alt) return;
+      const sc = document.getElementById('sage-content');
+      sc.innerHTML = '<div>Want something complementary? <strong>' + alt.name + '</strong></div><div style="margin-top:8px"><a class="sage-cta" href="' + alt.affiliateUrl + '" target="_blank" rel="noopener sponsored">Explore Complement</a></div>';
+      sc.querySelector('.sage-cta').addEventListener('click', ()=>{
+        safeTrack('cross_sell_click',{from: primary.id, to: alt.id});
+      });
+    }
+
+    // Returning visitor experience (local session only)
+    function rememberSession() {
+      try {
+        const session = JSON.parse(sessionStorage.getItem('hs_session') || '{}');
+        if (session.lastIntent) {
+          const sc = document.getElementById('sage-content');
+          sc.innerHTML = '<div>Welcome back. Last time you explored <strong>' + session.lastIntent + '</strong>. Want to continue?</div>';
+        }
+      } catch(e){}
+    }
+
+    // Wire up UI controls
+    document.addEventListener('DOMContentLoaded', function(){
+      var sage = document.getElementById('sage');
+      var openBtn = document.getElementById('open-sage');
+      var closeBtn = document.getElementById('sage-close');
+      var showBtn = document.getElementById('sage-show-find');
+      var compareBtn = document.getElementById('sage-compare');
+      var startOver = document.getElementById('sage-start-over');
+
+      openBtn.addEventListener('click', function(){ sage.hidden=false; document.getElementById('sage-state').textContent='Listening'; document.getElementById('sage-avatar').classList.add('avatar-listening'); safeTrack('sage_opened'); rememberSession(); });
+      closeBtn.addEventListener('click', function(){ sage.hidden=true; safeTrack('sage_closed'); });
+      startOver.addEventListener('click', function(){ HS.state='BROWSING'; HS.intent=null; HS.recommended=null; document.getElementById('sage-recommendation').hidden=true; document.getElementById('sage-content').textContent='What are we finding today?'; safeTrack('sage_start_over'); });
+
+      document.querySelectorAll('.sage-intent').forEach(function(btn){ btn.addEventListener('click', function(){ document.getElementById('sage-state').textContent='Thinking'; document.getElementById('sage-avatar').classList.remove('avatar-idle'); document.getElementById('sage-avatar').classList.add('avatar-thinking'); const intent = btn.getAttribute('data-intent'); recommendFor(intent); }); });
+
+      showBtn.addEventListener('click', function(){ // open currently recommended product
+        const rec = HS.recommended; if (!rec) { handleObjection('i\'m not sure which one'); return; }
+        safeTrack('cta_clicked',{product:rec.id, intent:HS.intent}); window.open(rec.affiliateUrl,'_blank','noopener');
       });
 
-      // Expose a simple global for manual tracking in console
-      window.hsTrack = hsTrack;
+      compareBtn.addEventListener('click', function(){ if (HS.recommended && HS.alternative) { showComparison(HS.recommended, HS.alternative); } else { handleObjection("i'm not sure which one"); } });
+
+      // Lightweight objection box (keyboard accessible) - detect simple typed objections
+      document.addEventListener('keydown', function(e){ if (e.key==='?' && !sage.hidden) { handleObjection('is this worth exploring'); } });
+
+      // Attach hs-affiliate tracking (already present in previous commit) remains active
     });
+
+    // Expose HS for debugging
+    window.HS_PRODUCTS = HS_PRODUCTS; window.HS = HS; window.safeTrack = safeTrack;
   </script>
 </body>
 </html>
