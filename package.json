@@ -1,0 +1,23 @@
+{
+  "name": "handsomesales",
+  "version": "1.0.0",
+  "description": "AI-powered affiliate discovery platform with intelligent shopping assistant",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'No build process needed for static HTML'",
+    "lint": "echo 'No linter configured'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "affiliate",
+    "analytics",
+    "vercel",
+    "static-site"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/analytics": "^1.3.1"
+  }
+}
