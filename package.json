@@ -1,0 +1,12 @@
+{
+  "name": "handsomesales",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-powered affiliate discovery platform with automated affiliate-link validation.",
+  "scripts": {
+    "validate": "node scripts/validate_affiliates.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

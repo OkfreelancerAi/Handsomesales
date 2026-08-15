@@ -1,0 +1,33 @@
+name: Ad/Subagent Validator
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Validate affiliate links
+        run: npm run validate 2>&1 | tee affiliate-validator.log
+      - name: Upload validator log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: affiliate-validator-log
+          path: affiliate-validator.log
