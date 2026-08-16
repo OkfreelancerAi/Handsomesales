@@ -16,18 +16,61 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+
       - name: Install
-        run: npm ci
+        id: install
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          npm ci > install_output.txt 2>&1
+          code=$?
+          echo "INSTALL_EXIT_CODE=$code" >> install_output.txt
+          exit "$code"
+
       - name: Validate affiliate links
-        run: npm run validate 2>&1 | tee affiliate-validator.log
+        id: validate
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          npm run validate > affiliate-validator.log 2>&1
+          code=$?
+          echo "VALIDATOR_EXIT_CODE=$code" >> affiliate-validator.log
+          exit "$code"
+
+      - name: Capture validation diagnostics
+        if: steps.install.outcome != 'success' || steps.validate.outcome != 'success'
+        shell: bash
+        run: |
+          if [ "${{ steps.install.outcome }}" != "success" ]; then
+            echo "Dependency installation failed." > affiliate-validator.log
+            cat install_output.txt >> affiliate-validator.log
+          fi
+          if [ ! -f affiliate-validator.log ]; then
+            echo "Validator did not produce a log." > affiliate-validator.log
+          fi
+
       - name: Upload validator log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: affiliate-validator-log
-          path: affiliate-validator.log
+          path: |
+            affiliate-validator.log
+            install_output.txt
+          if-no-files-found: warn
+
+      - name: Fail validation
+        if: steps.install.outcome != 'success' || steps.validate.outcome != 'success'
+        shell: bash
+        run: |
+          echo "Affiliate validation failed."
+          exit 1
