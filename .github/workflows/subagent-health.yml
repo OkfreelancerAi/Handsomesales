@@ -17,35 +17,65 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+
       - name: Install
         run: npm ci
-      - name: Run validator
+
+      - name: Run validator and capture result
         id: validate
-        continue-on-error: true
-        run: npm run validate 2>&1 | tee subagent-health.log
+        shell: bash
+        run: |
+          set +e
+          npm run validate > subagent-health.log 2>&1
+          exit_code=$?
+          echo "VALIDATOR_EXIT_CODE=$exit_code" >> "$GITHUB_ENV"
+          echo "Validator exit code: $exit_code" >> subagent-health.log
+          exit 0
+
       - name: Upload health log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: subagent-health-log
-          path: subagent-health.log
+          path: |
+            subagent-health.log
+            validator_output.txt
+          if-no-files-found: warn
+
       - name: Create or update alert issue
-        if: steps.validate.outcome == 'failure'
+        if: env.VALIDATOR_EXIT_CODE != '0'
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const fs = require('fs');
             const title = '🚨 Subagent Health: affiliate validation failed';
             const labels = ['subagent-alert', 'automation'];
             const { owner, repo } = context.repo;
             const issues = await github.paginate(github.rest.issues.listForRepo, {
               owner, repo, state: 'open', labels: 'subagent-alert', per_page: 100
             });
-            const body = `Automated affiliate validation failed on **${context.ref}**.\n\nRun: ${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}\n\nReview the uploaded \\`subagent-health-log\\` artifact and fix the failing affiliate validation.`;
+            const log = fs.existsSync('validator_output.txt')
+              ? fs.readFileSync('validator_output.txt', 'utf8')
+              : fs.existsSync('subagent-health.log')
+                ? fs.readFileSync('subagent-health.log', 'utf8')
+                : 'Validator failed; no validator output file was produced.';
+            const body = [
+              `Automated affiliate validation failed on **${context.ref}**.`,
+              '',
+              `Run: ${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
+              '',
+              '### Validator output',
+              '```text',
+              log.slice(-12000),
+              '```'
+            ].join('\n');
             const existing = issues.find(i => i.title === title);
             if (existing) {
               await github.rest.issues.update({ owner, repo, issue_number: existing.number, body, labels });
@@ -54,6 +84,9 @@ jobs:
               const issue = await github.rest.issues.create({ owner, repo, title, body, labels });
               core.info(`Created issue #${issue.data.number}`);
             }
+
       - name: Fail health check
-        if: steps.validate.outcome == 'failure'
-        run: exit 1
+        if: env.VALIDATOR_EXIT_CODE != '0'
+        run: |
+          echo "Validator failed with exit code $VALIDATOR_EXIT_CODE"
+          exit "$VALIDATOR_EXIT_CODE"
