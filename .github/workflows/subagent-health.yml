@@ -24,21 +24,40 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install
-        run: npm ci
-
-      - name: Run validator and capture result
-        id: validate
+      - name: Install dependencies
+        id: install
         shell: bash
         run: |
           set +e
-          npm run validate > subagent-health.log 2>&1
+          npm ci > install_output.txt 2>&1
           exit_code=$?
+          echo "INSTALL_EXIT_CODE=$exit_code" >> install_output.txt
+          echo "INSTALL_EXIT_CODE=$exit_code" >> "$GITHUB_ENV"
+          exit "$exit_code"
+
+      - name: Run validator and capture result
+        id: validate
+        if: steps.install.outcome == 'success'
+        shell: bash
+        run: |
+          set +e
+          npm run validate > validator_output.txt 2>&1
+          exit_code=$?
+          echo "Validator exit code: $exit_code" >> validator_output.txt
+          cp validator_output.txt subagent-health.log
           echo "VALIDATOR_EXIT_CODE=$exit_code" >> "$GITHUB_ENV"
-          echo "Validator exit code: $exit_code" >> subagent-health.log
           exit 0
 
-      - name: Upload health log
+      - name: Capture install failure
+        if: steps.install.outcome != 'success'
+        shell: bash
+        run: |
+          echo "Dependency installation failed." > subagent-health.log
+          cat install_output.txt >> subagent-health.log
+          echo "VALIDATOR_EXIT_CODE=2" >> "$GITHUB_ENV"
+          echo "Validator was not run because npm ci failed." >> validator_output.txt
+
+      - name: Upload health diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -46,6 +65,7 @@ jobs:
           path: |
             subagent-health.log
             validator_output.txt
+            install_output.txt
           if-no-files-found: warn
 
       - name: Create or update alert issue
@@ -65,7 +85,7 @@ jobs:
               ? fs.readFileSync('validator_output.txt', 'utf8')
               : fs.existsSync('subagent-health.log')
                 ? fs.readFileSync('subagent-health.log', 'utf8')
-                : 'Validator failed; no validator output file was produced.';
+                : 'Validator failed; no diagnostic output file was produced.';
             const body = [
               `Automated affiliate validation failed on **${context.ref}**.`,
               '',
@@ -88,5 +108,5 @@ jobs:
       - name: Fail health check
         if: env.VALIDATOR_EXIT_CODE != '0'
         run: |
-          echo "Validator failed with exit code $VALIDATOR_EXIT_CODE"
+          echo "Health check failed with exit code $VALIDATOR_EXIT_CODE"
           exit "$VALIDATOR_EXIT_CODE"
