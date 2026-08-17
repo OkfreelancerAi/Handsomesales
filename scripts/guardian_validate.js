@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 /**
- * GUARDIAN VALIDATOR — Phase 1 Safety Rail for HANDSOMESALES
+ * GUARDIAN VALIDATOR — Hardened Phase 1 Safety Rail for HANDSOMESALES
  * 
  * Enforces structural integrity, ASIN consistency, affiliate attribution,
  * and data synchronization across HTML elements and JS data models.
+ * 
+ * Hardened Features:
+ * 1. Safe static parsing for HS_PRODUCTS (No Function() or eval()).
+ * 2. Attribute-order independent HTML parsing for cards and anchors.
+ * 3. Scoped link inspection (only evaluates Amazon/affiliate links for tag/ASIN rules).
  */
 
 const fs = require('fs');
@@ -53,6 +58,55 @@ function addPass(checkName, msg) {
   report.checks[checkName].details.push(`[PASS] ${msg}`);
 }
 
+// Helper: Extract attributes safely regardless of order or whitespace
+function parseAttributes(attrString) {
+  const attrs = {};
+  const attrRegex = /([a-zA-Z0-9_:-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
+  let match;
+  while ((match = attrRegex.exec(attrString)) !== null) {
+    const key = match[1].toLowerCase();
+    const val = match[2] ?? match[3] ?? match[4] ?? true;
+    attrs[key] = val;
+  }
+  return attrs;
+}
+
+// Helper: Safe parser for HS_PRODUCTS JS array without Function() or eval()
+function safeParseHsProducts(rawJsArray) {
+  let cleaned = rawJsArray
+    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+    .trim();
+
+  const products = [];
+  const objectRegex = /\{([\s\S]*?)\}/g;
+  let objMatch;
+
+  while ((objMatch = objectRegex.exec(cleaned)) !== null) {
+    const objContent = objMatch[1];
+    const item = {};
+    
+    const kvRegex = /([a-zA-Z0-9_]+)\s*:\s*(?:"([^"]*)"|'([^']*)'|([^\s,}]+))/g;
+    let kvMatch;
+    while ((kvMatch = kvRegex.exec(objContent)) !== null) {
+      const key = kvMatch[1];
+      const val = kvMatch[2] ?? kvMatch[3] ?? kvMatch[4];
+      item[key] = val;
+    }
+
+    if (Object.keys(item).length > 0) {
+      products.push(item);
+    }
+  }
+
+  return products;
+}
+
+// Helper: Check if URL is an Amazon / affiliate link
+function isAmazonAffiliateLink(href) {
+  if (!href) return false;
+  return href.includes('amazon.com') || href.includes('amzn.to') || href.includes('tag=');
+}
+
 // 1. Read index.html
 if (!fs.existsSync(INDEX_HTML)) {
   addError('syncCheck', 'index.html not found');
@@ -61,35 +115,42 @@ if (!fs.existsSync(INDEX_HTML)) {
 
 const htmlContent = fs.readFileSync(INDEX_HTML, 'utf8');
 
-// 2. Parse HTML product cards
-const cardRegex = /<article\s+class="card"\s+data-product-id="([A-Z0-9]{10})">([\s\S]*?)<\/article>/gi;
+// 2. Parse HTML product cards (Attribute order independent)
+const cardRegex = /<article\b([^>]*)>([\s\S]*?)<\/article>/gi;
 const htmlProducts = [];
 let cardMatch;
 
 while ((cardMatch = cardRegex.exec(htmlContent)) !== null) {
-  const asin = cardMatch[1];
+  const attrStr = cardMatch[1];
   const cardBody = cardMatch[2];
+  const attrs = parseAttributes(attrStr);
 
-  // Extract affiliate anchor within this card
-  const anchorRegex = /<a\s+[^>]*href="([^"]+)"[^>]*>/gi;
+  const classes = (attrs.class || '').split(/\s+/);
+  if (!classes.includes('card')) {
+    continue;
+  }
+
+  const asin = attrs['data-product-id'];
+  if (!asin || !/^[A-Z0-9]{10}$/.test(asin)) {
+    addError('asinConsistency', `Article card missing or invalid data-product-id attribute`);
+    continue;
+  }
+
+  const anchorRegex = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi;
   let anchorMatch;
   const cardAnchors = [];
 
   while ((anchorMatch = anchorRegex.exec(cardBody)) !== null) {
-    const fullTag = anchorMatch[0];
-    const href = anchorMatch[1];
-    
-    // Parse attributes
-    const relMatch = fullTag.match(/rel="([^"]+)"/i);
-    const rel = relMatch ? relMatch[1].split(/\s+/) : [];
-    
-    const productAttrMatch = fullTag.match(/data-hs-product="([^"]+)"/i);
-    const dataHsProduct = productAttrMatch ? productAttrMatch[1] : null;
+    const anchorAttrStr = anchorMatch[1];
+    const fullTag = `<a${anchorAttrStr}>`;
+    const anchorAttrs = parseAttributes(anchorAttrStr);
 
-    const classMatch = fullTag.match(/class="([^"]+)"/i);
-    const classes = classMatch ? classMatch[1].split(/\s+/) : [];
+    const href = anchorAttrs.href || '';
+    const rel = (anchorAttrs.rel || '').split(/\s+/).filter(Boolean);
+    const dataHsProduct = anchorAttrs['data-hs-product'] || null;
+    const anchorClasses = (anchorAttrs.class || '').split(/\s+/).filter(Boolean);
 
-    cardAnchors.push({ fullTag, href, rel, dataHsProduct, classes });
+    cardAnchors.push({ fullTag, href, rel, dataHsProduct, classes: anchorClasses });
   }
 
   htmlProducts.push({
@@ -112,9 +173,13 @@ if (duplicateHtmlAsins.length > 0) {
 // 3. Validate HTML anchors
 for (const prod of htmlProducts) {
   for (const anchor of prod.anchors) {
+    if (!isAmazonAffiliateLink(anchor.href)) {
+      addPass('affiliateUrls', `ASIN ${prod.asin}: non-affiliate link ignored (${anchor.href})`);
+      continue;
+    }
+
     report.summary.totalUrlsChecked++;
     
-    // Check rel="noopener sponsored"
     const missingRel = REQUIRED_REL.filter(r => !anchor.rel.includes(r));
     if (missingRel.length > 0) {
       addError('htmlAnchorAttributes', `ASIN ${prod.asin}: anchor missing required rel attributes: ${missingRel.join(', ')} in ${anchor.fullTag}`);
@@ -122,14 +187,12 @@ for (const prod of htmlProducts) {
       addPass('htmlAnchorAttributes', `ASIN ${prod.asin}: rel="noopener sponsored" verified`);
     }
 
-    // Check data-hs-product matching card ASIN
     if (anchor.dataHsProduct !== prod.asin) {
       addError('asinConsistency', `ASIN ${prod.asin}: anchor data-hs-product="${anchor.dataHsProduct}" mismatch with parent card ASIN`);
     } else {
       addPass('asinConsistency', `ASIN ${prod.asin}: data-hs-product matches parent card`);
     }
 
-    // Check URL tag and ASIN
     try {
       const u = new URL(anchor.href);
       const tag = u.searchParams.get('tag');
@@ -148,7 +211,7 @@ for (const prod of htmlProducts) {
   }
 }
 
-// 4. Parse HS_PRODUCTS array from JS
+// 4. Safe Parse HS_PRODUCTS array from JS without Function()/eval()
 const hsProductsMatch = htmlContent.match(/const\s+HS_PRODUCTS\s*=\s*(\[\s*[\s\S]*?\n\s*\]);/);
 let jsProducts = [];
 
@@ -157,15 +220,14 @@ if (!hsProductsMatch) {
 } else {
   try {
     const rawJsArray = hsProductsMatch[1];
-    jsProducts = Function(`"use strict"; return (${rawJsArray});`)();
+    jsProducts = safeParseHsProducts(rawJsArray);
     report.summary.jsProductsCount = jsProducts.length;
-    addPass('jsDataModel', `Successfully parsed HS_PRODUCTS array (${jsProducts.length} items)`);
+    addPass('jsDataModel', `Safely parsed HS_PRODUCTS array without code execution (${jsProducts.length} items)`);
   } catch (err) {
     addError('jsDataModel', `Failed to parse HS_PRODUCTS JS array: ${err.message}`);
   }
 }
 
-// Check JS products internal integrity
 const jsAsins = [];
 for (const p of jsProducts) {
   if (!p.id || !/^[A-Z0-9]{10}$/.test(p.id)) {
@@ -178,7 +240,6 @@ for (const p of jsProducts) {
     addError('jsDataModel', `Product ${p.id} missing required fields (name, category, affiliateUrl)`);
   }
 
-  // Validate affiliateUrl in JS
   try {
     const u = new URL(p.affiliateUrl);
     const tag = u.searchParams.get('tag');
@@ -193,7 +254,6 @@ for (const p of jsProducts) {
   }
 }
 
-// Duplicate JS ASIN check
 const duplicateJsAsins = jsAsins.filter((asin, idx) => jsAsins.indexOf(asin) !== idx);
 if (duplicateJsAsins.length > 0) {
   addError('jsDataModel', `Duplicate ASINs found in HS_PRODUCTS: ${duplicateJsAsins.join(', ')}`);
